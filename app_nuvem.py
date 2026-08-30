@@ -111,12 +111,20 @@ if not st.session_state.logado:
         user=st.text_input("Usuário")
         senha=st.text_input("Senha",type="password")
         if st.button("Entrar",type="primary"):
+            # FIX: permite super admin mesmo sem usuarios.json na nuvem
+            if user == SUPER_ADMIN_USERNAME and hash_password(senha) == SUPER_ADMIN_PASSWORD_HASH:
+                st.session_state.logado=True; st.session_state.usuario=user; st.session_state.role="admin"; st.rerun()
             u=usuario_por_username(user)
             if u and (u.get("password")==senha or u.get("password")==hash_password(senha)):
                 if u.get("bloqueado"): st.error("Usuário bloqueado")
                 else:
                     st.session_state.logado=True; st.session_state.usuario=user; st.session_state.role=u.get("role","user"); st.rerun()
-            else: st.error("Usuário ou senha inválidos")
+            else: 
+                # tenta validar mesmo se o arquivo nao existe ainda
+                if user == SUPER_ADMIN_USERNAME:
+                    st.error(f"Senha do super admin incorreta. Hash digitado: {hash_password(senha)[:10]}...")
+                else:
+                    st.error("Usuário ou senha inválidos. Se é a primeira vez na nuvem, use andre.adm")
         if st.button("Voltar"): st.session_state.tela="menu"; st.rerun()
 
     elif st.session_state.tela=="cadastro":
@@ -158,10 +166,15 @@ if menu=="Dashboard":
     st.title("Dashboard"); df_val=pd.read_csv(DB_VALIDADES); df_cli=pd.read_csv(DB_CLIENTES)
     c1,c2,c3=st.columns(3); c1.metric("Clientes",len(df_cli)); c2.metric("Produtos",len(df_val))
     if not df_val.empty:
-        df_val["Validade"]=pd.to_datetime(df_val["Validade"])
-        vencidos=df_val[df_val["Validade"]<datetime.now()]
-        c3.metric("Vencidos",len(vencidos))
-        st.dataframe(df_val.sort_values("Validade"),use_container_width=True)
+        try:
+            df_val["Validade"]=pd.to_datetime(df_val["Validade"])
+            vencidos=df_val[df_val["Validade"]<datetime.now()]
+            c3.metric("Vencidos",len(vencidos))
+            st.dataframe(df_val.sort_values("Validade"),use_container_width=True)
+        except:
+            st.dataframe(df_val,use_container_width=True)
+    else:
+        st.info("Nenhum produto cadastrado ainda")
 
 elif menu=="Clientes":
     st.title("Clientes"); 
