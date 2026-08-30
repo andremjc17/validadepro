@@ -1,15 +1,17 @@
+import streamlit as st
+
+st.set_page_config(page_title="VALIDA PRO", page_icon="◈", layout="centered")
+
 st.title("◈ VALIDA PRO - Teste na Nuvem")
+st.success("Se você está vendo isso em validadepro.streamlit.app, está na nuvem!")
 
-st.set_page_config(page_title="Valida Pro", layout="wide")
-
-st.title("◈ VALIDA PRO")
-st.write("Se você está vendo isso, a nuvem funcionou!")
-
-usuario = st.text_input("Usuário")
+st.subheader("Login")
+email = st.text_input("Email")
 senha = st.text_input("Senha", type="password")
 
-if st.button("Entrar"):
-    st.success(f"Bem-vindo {usuario}! Agora vamos conectar com seu sistema real.")
-
-st.divider()
-st.info("Esse é só um teste. Depois que rodar, colamos seu código real de login aqui.")
+if st.button("Entrar", type="primary"):
+    if email and senha:
+        st.balloons()
+        st.success(f"Bem-vindo! Logado como {email}")
+    else:
+        st.error("Preencha email e senha")
