@@ -127,22 +127,15 @@ if not st.session_state.logado:
         senha2=st.text_input("Confirmar senha",type="password")
         senha_auth=st.text_input("Senha de autorização do ADM",type="password")
         if st.button("Criar conta ADMIN",type="primary"):
-            try:
-                from auth.auth_service import criar_conta_admin as criar
-                criar(username,codigo,senha,senha2,senha_auth)
-                st.success("Conta criada! Faça login")
-                st.session_state.tela="login"; st.rerun()
-            except Exception as e:
-                # Fallback local se auth_service nao estiver na nuvem
-                if not senha_super_admin_valida(senha_auth): st.error("Senha de autorização inválida")
-                elif not validar_codigo_cadastro(codigo): st.error("Código de cadastro inválido")
-                elif senha!=senha2: st.error("Senhas não conferem")
-                elif usuario_existe(username): st.error("Usuário já existe")
-                else:
-                    us=carregar_usuarios()
-                    us.append({"username":username,"password":hash_password(senha),"role":"admin","ip_acesso":gerar_ip_acesso(us)})
-                    salvar_usuarios(us)
-                    st.success("Conta criada!"); st.session_state.tela="login"; st.rerun()
+            if not senha_super_admin_valida(senha_auth): st.error("Senha de autorização inválida")
+            elif not validar_codigo_cadastro(codigo): st.error("Código de cadastro inválido")
+            elif senha!=senha2: st.error("Senhas não conferem")
+            elif usuario_existe(username): st.error("Usuário já existe")
+            else:
+                us=carregar_usuarios()
+                us.append({"username":username,"password":hash_password(senha),"role":"admin","ip_acesso":gerar_ip_acesso(us)})
+                salvar_usuarios(us)
+                st.success("Conta criada!"); st.session_state.tela="login"; st.rerun()
         if st.button("Voltar"): st.session_state.tela="menu"; st.rerun()
     st.stop()
 
